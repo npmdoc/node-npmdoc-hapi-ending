@@ -1,0 +1,192 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/desirable-objects/hapi-ending#readme"
+
+    >hapi-ending (v0.9.2)</a>
+</h1>
+<h4>Creates documentation of the endpoints of an application</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.hapi-ending">module hapi-ending</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.hapi-ending.register">
+            function <span class="apidocSignatureSpan">hapi-ending.</span>register
+            <span class="apidocSignatureSpan">(plugin, options, next)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.hapi-ending" id="apidoc.module.hapi-ending">module hapi-ending</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.hapi-ending.register" id="apidoc.element.hapi-ending.register">
+        function <span class="apidocSignatureSpan">hapi-ending.</span>register
+        <span class="apidocSignatureSpan">(plugin, options, next)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">register = function (plugin, options, next) {
+
+    if (!options.enabled) {
+        return next();
+    }
+
+    plugin.path(Path.join(__dirname, &#x27;.&#x27;));
+
+    plugin.register([
+      require(&#x27;vision&#x27;),
+      require(&#x27;inert&#x27;)
+    ], (err) =&#x3e; {
+        if (err) {
+            console.error(&#x27;Failed to load plugin:&#x27;, err);
+        }
+    });
+
+    var views = {
+        engines: {
+            handlebars: require(&#x27;handlebars&#x27;)
+        },
+        path: &#x27;./src/views&#x27;,
+        helpersPath: &#x27;./src/helpers&#x27;
+    };
+
+    plugin.views(views);
+
+    function routing(svr, options, next) {
+
+        let assetsPath = options.assetsPath || &#x27;assets&#x27;,
+            allRoutes = routeFlattener.fetchRoutes(svr);
+
+        return next(null, {
+          routes: routeFlattener.flatten(allRoutes),
+          baseUrl: options.baseUrl,
+          assetsPath,
+          logoUrl: options.logoUrl || `/${assetsPath}/img/hapi-logo.svg`,
+          documentationUrl: options.path || &#x27;&#x27;
+        });
+    }
+
+    plugin.method(&#x27;routing&#x27;, routing, { generateKey: () =&#x3e; { return &#x27;routing&#x27; }, cache: { expiresIn: 60000, generateTimeout: 30000
+ } });
+
+    plugin.route({
+        method: &#x27;GET&#x27;,
+        path: `${options.path || &#x27;&#x27;}/${options.assetsPath || &#x27;assets&#x27;}/{param*}`,
+        config: {
+          auth: false,
+          description: &#x22;Asset delivery url for hapi-ending plugin&#x22;,
+          tags: [&#x27;metadata&#x27;, &#x27;private&#x27;, &#x27;api&#x27;, &#x27;assets&#x27;]
+        },
+        handler: {
+            directory: {
+                path: &#x27;./src/public&#x27;,
+                listing: true
+            }
+        }
+    });
+
+    plugin.route({
+        method: &#x27;GET&#x27;,
+        path: options.path || &#x27;/&#x27;,
+        config: {
+            auth: false,
+            description: &#x22;Describes endpoints in your application&#x22;,
+            tags: [&#x27;metadata&#x27;, &#x27;private&#x27;, &#x27;api&#x27;]
+        },
+        handler: function(request, reply) {
+          request.server.methods.routing(request.server, options, (err, model) =&#x3e; {
+            return reply.view(&#x27;root&#x27;, model);
+          });
+        }
+    });
+
+    next();
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+if (!options.enabled) {
+    return next();
+}
+
+plugin.path(Path.join(__dirname, &#x27;.&#x27;));
+
+plugin.<span class="apidocCodeKeywordSpan">register</span>([
+  require(&#x27;vision&#x27;),
+  require(&#x27;inert&#x27;)
+], (err) =&#x3e; {
+    if (err) {
+        console.error(&#x27;Failed to load plugin:&#x27;, err);
+    }
+});
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
